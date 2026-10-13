@@ -1,0 +1,13 @@
+import { useState } from 'react';
+import PageHeader from '../components/PageHeader';
+import StatusBadge from '../components/StatusBadge';
+
+export default function DeedVerification() {
+  const [deedId, setDeedId] = useState('DEED-001');
+  const [checked, setChecked] = useState(false);
+  return <><PageHeader eyebrow="DOCUMENT INTEGRITY / DEED WORKSPACE" title="Deed verification" description="Prototype workspace for checking a document's recorded metadata and future SHA-256 integrity fingerprint." />
+    <div className="notice-banner"><div className="notice-symbol">i</div><div><strong>Verification capability is not yet connected</strong><p>The backend currently stores deed metadata and an optional SHA-256 field. This screen does not claim to verify an original legal document or official registry record.</p></div><StatusBadge tone="amber">Prototype UI</StatusBadge></div>
+    <div className="verification-grid"><section className="panel verification-form-panel"><div className="panel-heading"><div><h2>Inspect a deed record</h2><p>Enter an existing synthetic deed identifier.</p></div></div><form onSubmit={e => { e.preventDefault(); setChecked(true); }} className="stack-form"><label htmlFor="deed-id">Deed ID</label><input id="deed-id" value={deedId} onChange={e => { setDeedId(e.target.value); setChecked(false); }} placeholder="DEED-001" required /><div className="form-hint">Sample IDs: DEED-001, DEED-002</div><button className="button button-primary" type="submit">Preview verification checklist <span>→</span></button></form>{checked && <div className="verification-result"><StatusBadge tone="amber">Backend verification pending</StatusBadge><h3>{deedId}</h3><p>This UI has captured the record ID only. No live verification request has been sent.</p><ul><li>Confirm deed exists in database</li><li>Calculate SHA-256 from a provided file</li><li>Compare digest with stored record</li><li>Display verification outcome with evidence</li></ul></div>}</section>
+      <section className="panel integrity-panel"><div className="integrity-illustration"><div className="integrity-ring">◇</div><span className="integrity-node node-a"/><span className="integrity-node node-b"/><span className="integrity-node node-c"/></div><div className="eyebrow">PLANNED INTEGRITY WORKFLOW</div><h2>Document integrity checks</h2><p>A future implementation can hash an uploaded demo document and compare its SHA-256 digest with the digest stored in the synthetic deed record.</p><div className="integrity-steps"><div><span>01</span><strong>Read metadata</strong></div><div><span>02</span><strong>Compute SHA-256</strong></div><div><span>03</span><strong>Compare fingerprints</strong></div></div></section></div>
+  </>;
+}

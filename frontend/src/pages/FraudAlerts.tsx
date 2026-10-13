@@ -1,0 +1,28 @@
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
+import StatusBadge from '../components/StatusBadge';
+import LoadingState from '../components/LoadingState';
+import ErrorState from '../components/ErrorState';
+import { api } from '../services/api';
+import type { FraudAlert, FraudAnalysis } from '../types/api';
+
+export default function FraudAlerts() {
+  const [alerts, setAlerts] = useState<FraudAlert[]>([]);
+  const [status, setStatus] = useState('OPEN');
+  const [plotId, setPlotId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [analysis, setAnalysis] = useState<FraudAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const load = useCallback(async () => { setLoading(true); setError(''); try { setAlerts(await api.getFraudAlerts(plotId.trim() || undefined, status || undefined)); } catch (e) { setError(e instanceof Error ? e.message : 'Could not load alerts'); } finally { setLoading(false); } }, [plotId, status]);
+  useEffect(() => { void load(); }, [load]);
+  async function analyzeDemo() { setAnalyzing(true); setError(''); setAnalysis(null); try { const result = await api.analyzePlot(plotId.trim() || 'PLOT-003'); setAnalysis(result); await load(); } catch (e) { setError(e instanceof Error ? e.message : 'Analysis failed'); } finally { setAnalyzing(false); } }
+  return <><PageHeader eyebrow="RISK INTELLIGENCE / REVIEW QUEUE" title="Conflict alerts" description="Review explainable ownership-record flags saved by the rule-based conflict engine." action={<button className="button button-primary" onClick={() => void analyzeDemo()} disabled={analyzing}>{analyzing ? 'Analyzing…' : '＋ Run plot analysis'}</button>} />
+    <div className="notice-banner notice-warning"><div className="notice-symbol">!</div><div><strong>Alerts are investigation leads, not fraud verdicts</strong><p>Share inconsistencies can have multiple explanations. Review the evidence and seek qualified human assessment.</p></div></div>
+    <div className="filter-bar"><div className="filter-input-wrap"><label htmlFor="filter-plot">Plot ID</label><input id="filter-plot" value={plotId} onChange={e => setPlotId(e.target.value)} placeholder="All plots (e.g. PLOT-003)" /></div><div className="filter-input-wrap"><label htmlFor="filter-status">Alert status</label><select id="filter-status" value={status} onChange={e => setStatus(e.target.value)}><option value="OPEN">Open alerts</option><option value="RESOLVED">Resolved alerts</option><option value="">All statuses</option></select></div><button className="button button-secondary" onClick={() => void load()}>Apply filters</button><button className="button button-ghost" onClick={() => { setPlotId(''); setStatus(''); }}>Reset</button></div>
+    {analysis && <section className={`panel analysis-result ${analysis.requires_manual_review ? 'analysis-warning' : 'analysis-clean'}`}><div className="panel-heading"><div><div className="eyebrow">LATEST ANALYSIS · {analysis.plot_id}</div><h2>{analysis.analysis_status.replaceAll('_', ' ')}</h2><p>{analysis.note}</p></div><StatusBadge tone={analysis.requires_manual_review ? 'red' : 'green'}>{analysis.requires_manual_review ? 'Manual review required' : 'No conflict detected'}</StatusBadge></div><div className="analysis-metrics"><div><span>Recorded share total</span><strong>{analysis.total_recorded_share_percentage}%</strong></div><div><span>Alerts detected</span><strong>{analysis.alert_count}</strong></div><div><span>Alerts saved</span><strong>{analysis.alerts_saved ?? '—'}</strong></div></div></section>}
+    {error && <ErrorState message={error} onRetry={() => void load()} />}
+    <section className="panel alerts-table-panel"><div className="panel-heading"><div><h2>Saved alerts</h2><p>Persisted conflict records from the API</p></div><span className="result-count">{loading ? 'Loading…' : `${alerts.length} results`}</span></div>{loading ? <LoadingState label="Loading saved alerts…" /> : !error && alerts.length === 0 ? <div className="empty-state"><span className="empty-icon">✓</span><strong>No alerts match these filters</strong><p>Try all statuses, or run an analysis for the synthetic conflict scenario.</p><button className="button button-secondary button-small" onClick={() => { setStatus(''); setPlotId(''); }}>Show all alerts</button></div> : !error && <div className="table-wrap"><table><thead><tr><th>Alert / rule</th><th>Plot</th><th>Severity</th><th>Status</th><th>Evidence</th><th>Created</th></tr></thead><tbody>{alerts.map((alert, index) => <tr key={alert.id || alert.alert_id || `${alert.plot_id}-${alert.rule_code}-${index}`}><td><strong className="table-primary">{alert.rule_code}</strong><small className="table-secondary">{alert.message}</small></td><td><Link className="table-primary" to={`/plots/${alert.plot_id}`}>{alert.plot_id}</Link></td><td><StatusBadge tone={alert.severity === 'HIGH' ? 'red' : alert.severity === 'MEDIUM' ? 'amber' : 'blue'}>{alert.severity}</StatusBadge></td><td><StatusBadge tone={alert.status === 'OPEN' ? 'amber' : 'green'}>{alert.status}</StatusBadge></td><td><span className="evidence-count">{alert.evidence?.length || 0} items</span></td><td>{alert.created_at ? new Date(alert.created_at).toLocaleString() : '—'}</td></tr>)}</tbody></table></div>}</section>
+  </>;
+}

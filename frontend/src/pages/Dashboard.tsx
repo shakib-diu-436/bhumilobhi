@@ -6,6 +6,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import { api } from '../services/api';
 import type { FraudAlert } from '../types/api';
+import { useAuth } from '../auth/AuthProvider';
 
 const shortcuts = [
   { title: 'Find an owner', desc: 'Search synthetic owner IDs and view linked plots.', to: '/owners', icon: '⌕', color: 'blue' },
@@ -14,6 +15,7 @@ const shortcuts = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [alerts, setAlerts] = useState<FraudAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,7 +23,7 @@ export default function Dashboard() {
   useEffect(() => { void load(); }, []);
   const openCount = alerts.filter(a => (a.status || 'OPEN').toUpperCase() === 'OPEN').length;
   return <>
-    <PageHeader eyebrow="MONDAY, OCTOBER 13 · DEMO ENVIRONMENT" title="Good evening, Admin" description="Here’s what’s happening across your synthetic land-record workspace." action={<Link className="button button-primary" to="/fraud-alerts"><span>＋</span> Investigate conflicts</Link>} />
+    <PageHeader eyebrow="LAND OWNERSHIP INTELLIGENCE · SYNTHETIC ENVIRONMENT" title={`Welcome, ${user?.display_name || 'there'}`} description="Here’s what’s happening across your synthetic land-record workspace." action={<Link className="button button-primary" to="/fraud-alerts"><span>＋</span> Investigate conflicts</Link>} />
     <div className="notice-banner"><div className="notice-symbol">i</div><div><strong>Demo data is active</strong><p>All owners, plots and ownership records in this prototype are synthetic. Conflict alerts indicate records for manual review, not a legal finding of fraud.</p></div><StatusBadge tone="blue">Synthetic data</StatusBadge></div>
     <div className="section-heading"><div><h2>Workspace overview</h2><p>Quick snapshot of the prototype records</p></div><span className="muted-caption">Live alert count from API when connected</span></div>
     <div className="stats-grid">

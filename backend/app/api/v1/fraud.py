@@ -6,11 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.core.permissions import get_current_user
 from app.models.plot import Plot
 from app.models.alert import FraudAlert
 from app.services.fraud_service import analyze_plot_conflicts
 
-router = APIRouter(prefix="/fraud", tags=["BhumiGraph"])
+router = APIRouter(
+    prefix="/fraud", tags=["BhumiGraph"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router.post("/analyze/{plot_id}")

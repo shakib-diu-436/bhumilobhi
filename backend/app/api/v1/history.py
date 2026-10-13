@@ -4,12 +4,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.core.permissions import get_current_user
 from app.models.plot import Plot
 from app.models.owner import Owner
 from app.models.ownership import OwnershipRecord
 from app.models.deed import Deed
 
-router = APIRouter(prefix="/plots", tags=["Ownership History"])
+router = APIRouter(
+    prefix="/plots", tags=["Ownership History"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router.get("/{plot_id}/history")

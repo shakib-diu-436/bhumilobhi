@@ -4,11 +4,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.core.permissions import get_current_user
 from app.models.plot import Plot
 from app.models.ownership import OwnershipRecord
 from app.models.owner import Owner
 
-router = APIRouter(prefix="/plots", tags=["Plots"])
+router = APIRouter(
+    prefix="/plots", tags=["Plots"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router.get("/{plot_id}")

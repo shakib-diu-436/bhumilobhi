@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.core.permissions import get_current_user
 from app.models.owner import Owner
 from app.models.plot import Plot
 from app.models.ownership import OwnershipRecord
@@ -13,7 +14,9 @@ from app.schemas.owner import (
     OwnerPlotResult,
 )
 
-router = APIRouter(prefix="/owners", tags=["Owners"])
+router = APIRouter(
+    prefix="/owners", tags=["Owners"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router.post("/search", response_model=OwnerSearchResponse)

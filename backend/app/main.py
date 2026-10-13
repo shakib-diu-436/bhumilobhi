@@ -7,11 +7,13 @@ from app.api.v1.plots import router as plots_router
 from app.api.v1.history import router as history_router
 from app.api.v1.owners import router as owners_router
 from app.api.v1.fraud import router as fraud_router
+from app.api.v1.auth import router as auth_router
 from app.models.alert import FraudAlert
 from app.models.owner import Owner
 from app.models.plot import Plot
 from app.models.ownership import OwnershipRecord
 from app.models.deed import Deed
+from app.models.user import AuthSession, User
 
 Base.metadata.create_all(bind=engine)
 
@@ -28,13 +30,11 @@ app.include_router(
     prefix="/api/v1",
 )
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,6 +43,7 @@ app.add_middleware(
 app.include_router(plots_router, prefix="/api/v1")
 app.include_router(history_router, prefix="/api/v1")
 app.include_router(fraud_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1")
 
 @app.get("/api/v1/health")
 def health_check():

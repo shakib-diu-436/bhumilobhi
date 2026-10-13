@@ -66,3 +66,17 @@ export type HistoryEvent = {
   owner_id?: string;
   [key: string]: unknown;
 };
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  display_name: string;
+  account_status: string;
+};
+
+export type AuthResponse = {
+  access_token: string;
+  token_type: 'bearer';
+  expires_in: number;
+  user: AuthUser;
+};

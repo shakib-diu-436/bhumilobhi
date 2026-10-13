@@ -35,36 +35,75 @@ export type FraudAnalysis = {
   analysis_status: string;
   total_recorded_share_percentage: number;
   alert_count: number;
-  alerts: Array<FraudAlert & { alert_id?: string }>;
+  alerts: Array<{
+    alert_id: string;
+    rule_code: string;
+    severity: string;
+    message: string;
+    evidence: Array<Record<string, unknown>>;
+  }>;
   requires_manual_review: boolean;
   note: string;
-  alerts_saved?: number;
+  alerts_saved: number;
+};
+
+export type PlotOwner = {
+  owner_id: string;
+  owner_code: string;
+  display_name: string;
+  share_numerator: number;
+  share_denominator: number;
+  share_percentage: number;
 };
 
 export type PlotDetailsResponse = {
-  id?: string;
-  plot_id?: string;
+  plot_id: string;
   plot_code: string;
   mouza: string;
   jl_number?: string | null;
   area: number;
   area_unit: string;
-  is_synthetic_boundary?: boolean;
-  owners?: Array<Record<string, unknown>>;
-  ownerships?: Array<Record<string, unknown>>;
-  [key: string]: unknown;
+  is_synthetic_boundary: boolean;
+  owners: PlotOwner[];
+  owner_count: number;
 };
 
 export type HistoryEvent = {
-  event_type?: string;
-  type?: string;
-  date?: string;
-  deed_date?: string;
-  valid_from?: string;
-  description?: string;
-  owner_name?: string;
-  owner_id?: string;
-  [key: string]: unknown;
+  date: string;
+  event_type: 'OWNERSHIP_RECORD' | 'DEED' | string;
+  record_id: string;
+  owner_id?: string | null;
+  owner_name?: string | null;
+  share?: string | null;
+  valid_to?: string | null;
+  status?: string | null;
+  deed_type?: string | null;
+  verification_status?: string | null;
+};
+
+export type OwnershipHistoryResponse = {
+  plot_id: string;
+  plot_code: string;
+  history_count: number;
+  history: HistoryEvent[];
+  note: string;
+};
+
+export type DashboardSummary = {
+  plot_count: number;
+  owner_count: number;
+  deed_count: number;
+  open_alert_count: number;
+  recent_alerts: FraudAlert[];
+  plots: Array<{ plot_id: string; plot_code: string }>;
+};
+
+export type DeedVerificationResult = {
+  deed_id: string;
+  status: 'MATCH' | 'MISMATCH' | 'NO_REFERENCE';
+  reference_available: boolean;
+  uploaded_sha256: string;
+  message: string;
 };
 
 export type AuthUser = {

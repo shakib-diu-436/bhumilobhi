@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class OwnerSearchRequest(BaseModel):
@@ -8,6 +8,14 @@ class OwnerSearchRequest(BaseModel):
         max_length=40,
         examples=["SYN-NID-0001"],
     )
+
+    @field_validator("synthetic_identifier")
+    @classmethod
+    def strip_identifier(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Synthetic identifier is required")
+        return value
 
 
 class OwnerPlotResult(BaseModel):

@@ -8,13 +8,14 @@ from app.core.permissions import get_current_user
 from app.models.plot import Plot
 from app.models.ownership import OwnershipRecord
 from app.models.owner import Owner
+from app.schemas.plot import PlotDetailsResponse
 
 router = APIRouter(
     prefix="/plots", tags=["Plots"], dependencies=[Depends(get_current_user)]
 )
 
 
-@router.get("/{plot_id}")
+@router.get("/{plot_id}", response_model=PlotDetailsResponse)
 def get_plot_details(
     plot_id: str,
     db: Session = Depends(get_db),

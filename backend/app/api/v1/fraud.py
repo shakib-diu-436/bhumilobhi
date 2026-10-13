@@ -10,13 +10,14 @@ from app.core.permissions import get_current_user
 from app.models.plot import Plot
 from app.models.alert import FraudAlert
 from app.services.fraud_service import analyze_plot_conflicts
+from app.schemas.fraud import FraudAlertResponse, FraudAnalysisResponse
 
 router = APIRouter(
     prefix="/fraud", tags=["BhumiGraph"], dependencies=[Depends(get_current_user)]
 )
 
 
-@router.post("/analyze/{plot_id}")
+@router.post("/analyze/{plot_id}", response_model=FraudAnalysisResponse)
 def analyze_plot(plot_id: str, db: Session = Depends(get_db)):
     plot = db.scalar(select(Plot).where(Plot.id == plot_id))
 
@@ -75,7 +76,7 @@ def analyze_plot(plot_id: str, db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/alerts")
+@router.get("/alerts", response_model=list[FraudAlertResponse])
 def get_fraud_alerts(
     plot_id: str | None = None,
     status: str | None = None,

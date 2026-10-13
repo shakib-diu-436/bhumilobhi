@@ -1,4 +1,4 @@
-import type { AuthResponse, FraudAlert, FraudAnalysis, OwnerSearchResponse, PlotDetailsResponse, HistoryEvent } from '../types/api';
+import type { AuthResponse, DashboardSummary, DeedVerificationResult, FraudAlert, FraudAnalysis, OwnerSearchResponse, PlotDetailsResponse, OwnershipHistoryResponse } from '../types/api';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1').replace(/\/$/, '');
 let accessToken: string | null = null;
@@ -20,7 +20,7 @@ async function fetchJson<T>(path: string, options: RequestInit = {}, authenticat
   try {
     const headers = new Headers(options.headers);
     headers.set('Accept', 'application/json');
-    if (options.body) headers.set('Content-Type', 'application/json');
+    if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
     if (authenticated && accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
@@ -83,7 +83,7 @@ export const api = {
   logout: () => request<void>('/auth/logout', { method: 'POST' }, false),
   searchOwner: (syntheticIdentifier: string) => request<OwnerSearchResponse>('/owners/search', { method: 'POST', body: JSON.stringify({ synthetic_identifier: syntheticIdentifier }) }),
   getPlot: (plotId: string) => request<PlotDetailsResponse>(`/plots/${encodeURIComponent(plotId)}`),
-  getOwnershipHistory: (plotId: string) => request<HistoryEvent[] | Record<string, unknown>>(`/plots/${encodeURIComponent(plotId)}/history`),
+  getOwnershipHistory: (plotId: string) => request<OwnershipHistoryResponse>(`/plots/${encodeURIComponent(plotId)}/history`),
   analyzePlot: (plotId: string) => request<FraudAnalysis>(`/fraud/analyze/${encodeURIComponent(plotId)}`, { method: 'POST' }),
   getFraudAlerts: (plotId?: string, status?: string) => {
     const params = new URLSearchParams();
@@ -91,6 +91,12 @@ export const api = {
     if (status) params.set('status', status);
     const query = params.toString();
     return request<FraudAlert[]>(`/fraud/alerts${query ? `?${query}` : ''}`);
+  },
+  getDashboardSummary: () => request<DashboardSummary>('/dashboard/summary'),
+  verifyDeed: (deedId: string, file: File) => {
+    const body = new FormData();
+    body.append('file', file);
+    return request<DeedVerificationResult>(`/deeds/${encodeURIComponent(deedId)}/verify`, { method: 'POST', body });
   },
 };
 

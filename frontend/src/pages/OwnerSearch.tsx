@@ -7,14 +7,14 @@ import { api } from '../services/api';
 import type { OwnerSearchResponse } from '../types/api';
 
 export default function OwnerSearch() {
-  const [identifier, setIdentifier] = useState('SYN-NID-0001');
+  const [identifier, setIdentifier] = useState('');
   const [result, setResult] = useState<OwnerSearchResponse | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  async function search(e: React.FormEvent) { e.preventDefault(); setLoading(true); setError(''); setResult(null); try { setResult(await api.searchOwner(identifier.trim())); } catch (err) { setError(err instanceof Error ? err.message : 'Search failed'); } finally { setLoading(false); } }
+  async function search(e: React.FormEvent) { e.preventDefault(); const normalized = identifier.trim(); setResult(null); setError(''); if (!normalized) { setError('Enter a synthetic owner identifier.'); return; } setLoading(true); try { setResult(await api.searchOwner(normalized)); } catch (err) { setError(err instanceof Error ? err.message : 'Search failed'); } finally { setLoading(false); } }
   return <><PageHeader eyebrow="LAND RECORDS / OWNER DIRECTORY" title="Owner search" description="Find synthetic owner profiles and inspect the plots connected to each record." />
-    <section className="panel search-panel"><div className="panel-heading"><div><h2>Search by synthetic identifier</h2><p>Use a demo ID such as SYN-NID-0001. Never enter a real national ID.</p></div><StatusBadge tone="blue">Privacy-safe demo</StatusBadge></div>
-      <form onSubmit={search} className="search-form"><label htmlFor="owner-id">Synthetic owner ID</label><div className="search-input-row"><span className="input-search-icon">⌕</span><input id="owner-id" value={identifier} onChange={e => setIdentifier(e.target.value)} placeholder="SYN-NID-0001" required maxLength={40} /><button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search owner'} <span>→</span></button></div><div className="form-hint">Try: SYN-NID-0001, SYN-NID-0002 or SYN-NID-0003</div></form>
+    <section className="panel search-panel"><div className="panel-heading"><div><h2>Search by synthetic identifier</h2><p>Use an identifier stored in your synthetic land-record database. Never enter a real national ID.</p></div><StatusBadge tone="blue">Privacy-safe demo</StatusBadge></div>
+      <form onSubmit={search} className="search-form"><label htmlFor="owner-id">Synthetic owner ID</label><div className="search-input-row"><span className="input-search-icon">⌕</span><input id="owner-id" value={identifier} onChange={e => setIdentifier(e.target.value)} placeholder="SYN-NID-0001" required maxLength={40} aria-describedby="owner-id-hint" /><button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search owner'} <span>→</span></button></div><div id="owner-id-hint" className="form-hint">Enter a synthetic identifier from your land-record database.</div></form>
     </section>
     {error && <ErrorState message={error} />}
     {result && <><section className="panel owner-profile"><div className="owner-avatar-large">{result.display_name?.split(' ').map(s => s[0]).slice(0, 2).join('') || 'OW'}</div><div className="owner-main"><div className="eyebrow">OWNER PROFILE · {result.owner_code}</div><h2>{result.display_name}</h2><p>{result.synthetic_identifier}</p><div className="owner-tags"><StatusBadge tone="green">Synthetic record</StatusBadge><StatusBadge tone="blue">Active profile</StatusBadge></div></div><div className="owner-summary"><span>Linked plots</span><strong>{result.total_plots}</strong></div></section>

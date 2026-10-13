@@ -9,13 +9,14 @@ from app.models.plot import Plot
 from app.models.owner import Owner
 from app.models.ownership import OwnershipRecord
 from app.models.deed import Deed
+from app.schemas.history import OwnershipHistoryResponse
 
 router = APIRouter(
     prefix="/plots", tags=["Ownership History"], dependencies=[Depends(get_current_user)]
 )
 
 
-@router.get("/{plot_id}/history")
+@router.get("/{plot_id}/history", response_model=OwnershipHistoryResponse)
 def get_ownership_history(
     plot_id: str,
     db: Session = Depends(get_db),

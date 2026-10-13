@@ -1,6 +1,15 @@
 
 from fastapi import FastAPI
 from sqlalchemy import text
+from app.db.base import Base
+from app.db.session import engine
+
+from app.models.owner import Owner
+from app.models.plot import Plot
+from app.models.ownership import OwnershipRecord
+from app.models.deed import Deed
+
+Base.metadata.create_all(bind=engine)
 
 from app.db.session import engine
 

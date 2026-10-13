@@ -62,6 +62,15 @@ def seed_data():
                 "area_unit": "decimal",
                 "is_synthetic_boundary": True,
             },
+            {
+                "id": "PLOT-003",
+                "plot_code": "P-1003",
+                "mouza": "Demo Mouza B",
+                "jl_number": "JL-002",
+                "area": Decimal("6.0000"),
+                "area_unit": "decimal",
+                "is_synthetic_boundary": True,
+            },
         ]
 
         for item in plots:
@@ -98,6 +107,25 @@ def seed_data():
                 "valid_from": date(2023, 3, 1),
                 "record_status": "RECORDED",
             },
+
+            {
+    "id": "OR-004",
+    "plot_id": "PLOT-003",
+    "owner_id": "OWN-001",
+    "share_numerator": 3,
+    "share_denominator": 4,
+    "valid_from": date(2024, 1, 1),
+    "record_status": "RECORDED",
+},
+{
+    "id": "OR-005",
+    "plot_id": "PLOT-003",
+    "owner_id": "OWN-002",
+    "share_numerator": 1,
+    "share_denominator": 2,
+    "valid_from": date(2024, 1, 1),
+    "record_status": "RECORDED",
+},
         ]
 
         for item in ownerships:
